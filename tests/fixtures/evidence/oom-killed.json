@@ -1,0 +1,31 @@
+{
+  "resource": {"kind": "Pod", "namespace": "default", "name": "oom-pod", "uid": "ghi-789"},
+  "pod": {
+    "namespace": "default",
+    "name": "oom-pod",
+    "uid": "ghi-789",
+    "phase": "Running",
+    "container_statuses": [
+      {
+        "name": "worker",
+        "ready": false,
+        "state": "waiting",
+        "waiting_reason": "CrashLoopBackOff",
+        "terminated_reason": "OOMKilled",
+        "terminated_exit_code": 137,
+        "restart_count": 5,
+        "image": "myapp:latest",
+        "image_id": "sha256:abc"
+      }
+    ],
+    "resource_requests": {"cpu": "100m", "memory": "128Mi"},
+    "resource_limits": {"cpu": "500m", "memory": "256Mi"},
+    "qos_class": "Burstable"
+  },
+  "events": [
+    {"reason": "BackOff", "message": "Back-off restarting failed container", "count": 5, "type": "Normal"}
+  ],
+  "logs": [
+    {"container": "worker", "lines": ["Starting worker...", "Allocating 500MB buffer", "java.lang.OutOfMemoryError: Java heap space"], "truncated": false, "redacted": false}
+  ]
+}

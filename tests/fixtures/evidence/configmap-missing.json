@@ -1,0 +1,26 @@
+{
+  "resource": {"kind": "Pod", "namespace": "default", "name": "config-pod", "uid": "mno-345"},
+  "pod": {
+    "namespace": "default",
+    "name": "config-pod",
+    "uid": "mno-345",
+    "phase": "Running",
+    "container_statuses": [
+      {
+        "name": "app",
+        "ready": false,
+        "state": "waiting",
+        "waiting_reason": "CreateContainerConfigError",
+        "waiting_message": "configmap \"my-config\" not found",
+        "restart_count": 0,
+        "image": "myapp:v1",
+        "image_id": ""
+      }
+    ],
+    "configmap_refs": ["my-config"]
+  },
+  "events": [
+    {"reason": "Failed", "message": "configmap \"my-config\" not found", "count": 2, "type": "Warning"}
+  ],
+  "logs": []
+}

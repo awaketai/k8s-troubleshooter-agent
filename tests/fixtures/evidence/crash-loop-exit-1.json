@@ -1,0 +1,28 @@
+{
+  "resource": {"kind": "Pod", "namespace": "default", "name": "crash-pod", "uid": "stu-901"},
+  "pod": {
+    "namespace": "default",
+    "name": "crash-pod",
+    "uid": "stu-901",
+    "phase": "Running",
+    "container_statuses": [
+      {
+        "name": "app",
+        "ready": false,
+        "state": "waiting",
+        "waiting_reason": "CrashLoopBackOff",
+        "terminated_reason": "Error",
+        "terminated_exit_code": 1,
+        "restart_count": 8,
+        "image": "myapp:v1",
+        "image_id": "sha256:def"
+      }
+    ]
+  },
+  "events": [
+    {"reason": "BackOff", "message": "Back-off restarting failed container app", "count": 8, "type": "Normal"}
+  ],
+  "logs": [
+    {"container": "app", "lines": ["Starting application...", "Error: configuration file not found", "Fatal: cannot connect to database"], "truncated": false, "redacted": false}
+  ]
+}

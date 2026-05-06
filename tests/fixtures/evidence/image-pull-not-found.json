@@ -1,0 +1,27 @@
+{
+  "resource": {"kind": "Pod", "namespace": "default", "name": "demo-pod", "uid": "abc-123"},
+  "pod": {
+    "namespace": "default",
+    "name": "demo-pod",
+    "uid": "abc-123",
+    "phase": "Running",
+    "container_statuses": [
+      {
+        "name": "main",
+        "ready": false,
+        "state": "waiting",
+        "waiting_reason": "ImagePullBackOff",
+        "waiting_message": "Back-off pulling image \"nginx:nonexistent-tag\"",
+        "restart_count": 0,
+        "image": "nginx:nonexistent-tag",
+        "image_id": ""
+      }
+    ],
+    "image_pull_secrets": []
+  },
+  "events": [
+    {"reason": "Failed", "message": "Failed to pull image \"nginx:nonexistent-tag\": rpc error: code = NotFound desc = manifest unknown", "count": 3, "type": "Warning"},
+    {"reason": "BackOff", "message": "Back-off pulling image \"nginx:nonexistent-tag\"", "count": 10, "type": "Normal"}
+  ],
+  "logs": []
+}

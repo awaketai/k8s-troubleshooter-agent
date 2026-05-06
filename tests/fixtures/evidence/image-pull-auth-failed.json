@@ -1,0 +1,26 @@
+{
+  "resource": {"kind": "Pod", "namespace": "default", "name": "auth-pod", "uid": "def-456"},
+  "pod": {
+    "namespace": "default",
+    "name": "auth-pod",
+    "uid": "def-456",
+    "phase": "Running",
+    "container_statuses": [
+      {
+        "name": "app",
+        "ready": false,
+        "state": "waiting",
+        "waiting_reason": "ErrImagePull",
+        "waiting_message": "pull access denied",
+        "restart_count": 0,
+        "image": "registry.example.com/private/app:v1",
+        "image_id": ""
+      }
+    ],
+    "image_pull_secrets": []
+  },
+  "events": [
+    {"reason": "Failed", "message": "Failed to pull image: pull access denied for registry.example.com/private/app", "count": 2, "type": "Warning"}
+  ],
+  "logs": []
+}

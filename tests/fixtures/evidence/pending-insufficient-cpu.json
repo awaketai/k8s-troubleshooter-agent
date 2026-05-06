@@ -1,0 +1,18 @@
+{
+  "resource": {"kind": "Pod", "namespace": "default", "name": "pending-pod", "uid": "jkl-012"},
+  "pod": {
+    "namespace": "default",
+    "name": "pending-pod",
+    "uid": "jkl-012",
+    "phase": "Pending",
+    "node_name": null,
+    "container_statuses": [],
+    "resource_requests": {"cpu": "16", "memory": "32Gi"},
+    "node_selector": {},
+    "tolerations": []
+  },
+  "events": [
+    {"reason": "FailedScheduling", "message": "0/3 nodes are available: 3 Insufficient cpu.", "count": 5, "type": "Warning"}
+  ],
+  "logs": []
+}

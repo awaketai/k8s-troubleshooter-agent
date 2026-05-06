@@ -1,0 +1,15 @@
+# K8s Troubleshooter Agent configuration example
+kubeconfig: ~/.kube/config
+context: null
+namespace: null
+
+llm:
+  provider: openai
+  api_key_env: OPENAI_API_KEY
+  base_url_env: OPENAI_BASE_URL
+  model_env: OPENAI_MODEL
+
+max_tool_calls: 50
+log_tail_lines: 200
+max_pods_per_scan: 10
+enable_secret_check: false

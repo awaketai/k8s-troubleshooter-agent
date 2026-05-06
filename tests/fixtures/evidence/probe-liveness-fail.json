@@ -1,0 +1,32 @@
+{
+  "resource": {"kind": "Pod", "namespace": "default", "name": "probe-pod", "uid": "pqr-678"},
+  "pod": {
+    "namespace": "default",
+    "name": "probe-pod",
+    "uid": "pqr-678",
+    "phase": "Running",
+    "container_statuses": [
+      {
+        "name": "web",
+        "ready": false,
+        "state": "running",
+        "restart_count": 3,
+        "image": "myapp:v1",
+        "liveness_probe": {
+          "type": "httpGet",
+          "path": "/healthz",
+          "port": 8080,
+          "initialDelaySeconds": 2,
+          "timeoutSeconds": 1,
+          "periodSeconds": 5,
+          "failureThreshold": 3
+        }
+      }
+    ]
+  },
+  "events": [
+    {"reason": "Unhealthy", "message": "Liveness probe failed: HTTP probe failed with statuscode: 503", "count": 6, "type": "Warning"},
+    {"reason": "Killing", "message": "Container web failed liveness probe, will be restarted", "count": 3, "type": "Normal"}
+  ],
+  "logs": []
+}
