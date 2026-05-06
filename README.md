@@ -1,13 +1,14 @@
 # k8s-troubleshooter-agent
 
-Kubernetes 问题诊断 Agent，基于规则引擎 + LLM 推理的双层诊断架构，通过交互式终端对 Pod 进行自动化故障排查。
+Kubernetes 问题诊断 Agent，基于 LLM 意图理解 + 规则引擎诊断的双层架构，通过交互式终端对 Pod 进行自动化故障排查。
 
 ## 功能特性
 
+- **LLM 意图理解** — 自然语言输入由 LLM 解析，准确提取诊断意图、Pod 名称和症状（支持中英文混合）
 - **规则引擎诊断** — 内置 6 种常见故障的自动检测：ImagePullBackOff、CrashLoopBackOff、OOMKilled、调度失败、配置错误、探针失败
-- **LLM 推理兜底** — 规则无法覆盖时，自动调用 LLM 进行分析（需配置 API Key）
-- **纯规则模式** — 不配置 LLM 也可使用，完全依赖规则引擎
-- **交互式终端** — 支持中文自然语言输入，自动解析诊断意图
+- **LLM 推理兜底** — 规则无法覆盖或置信度不足时，自动调用 LLM 进行深度分析
+- **双模式运行** — 配置 LLM 时为完整模式（LLM 意图理解 + 诊断推理）；未配置时降级为纯规则模式（关键词匹配 + 规则诊断）
+- **交互式终端** — Rich Markdown 渲染、诊断进度动画、非 K8s 输入友好提示
 - **安全策略** — 只读访问、敏感信息脱敏、命名空间白名单、Secret 安全检查需显式开启
 - **诊断追踪** — 每次诊断生成 Trace 记录，包含完整的工具调用链和策略决策
 
@@ -28,29 +29,29 @@ uv pip install -e .
 ## 快速开始
 
 ```bash
-# 最简启动（使用默认 kubeconfig，无 LLM）
+# 完整模式（推荐）：配置 .env 中的 LLM 信息
 k8s-troubleshooter
 
 # 指定 namespace
 k8s-troubleshooter --namespace production
 
-# 启用 LLM 推理（需设置环境变量）
-OPENAI_API_KEY=sk-xxx OPENAI_MODEL=gpt-4o k8s-troubleshooter
+# 纯规则模式（无需 LLM，仅支持关键词匹配和 ns/name 格式输入）
+k8s-troubleshooter
 ```
 
 启动后进入交互式终端：
 
 ```
-> 看看 default namespace 有什么异常的 pod
-正在诊断...
+> 看看这个 pod 为什么启动失败：test-crashloop
+⠋ 正在分析...
 
-诊断对象: Pod/default/demo-pod
+诊断对象: Pod/default/test-crashloop
 当前状态: CrashLoopBackOff
 ...
 
-> 排查 default/demo-pod 为什么起不来
-> 详细看看那个 OOM 的
+> default/demo-pod                  # kubectl 风格快速诊断
 > 这个 finding 是什么意思
+> 你好                               # 非 K8s 输入有友好提示
 ```
 
 ## 配置
@@ -99,9 +100,9 @@ allowed_namespaces:
 
 ### LLM 配置
 
-LLM 功能通过环境变量配置，兼容 OpenAI API 格式。
+LLM 同时用于**意图理解**（解析自然语言输入）和**诊断推理**（规则未覆盖时的深度分析）。推荐配置以获得最佳体验。
 
-**优先级：环境变量 > config.yaml 中的值 > 内置默认值**
+通过 `.env` 文件或环境变量配置，兼容 OpenAI API 格式：
 
 | 环境变量 | 说明 | 默认值 |
 |---|---|---|
@@ -154,8 +155,9 @@ llm:
 **Pod 诊断** — 对单个 Pod 进行深度诊断：
 
 ```
+> 看看这个 pod 为什么启动失败：test-crashloop
 > 排查 default/demo-pod 为什么起不来
-> 检查 pod my-app-7d4f8b-x2k1
+> default/demo-pod                              # kubectl 风格，无需 LLM
 ```
 
 **Namespace 扫描** — 扫描 namespace 下所有异常 Pod：
@@ -172,9 +174,9 @@ llm:
 > 解释一下那个 OOMKilled 的原因
 ```
 
-### 支持的关键词
+### 纯规则模式关键词
 
-**诊断意图**：排查、诊断、查看、看看、检查、扫描、diagnose、check、scan
+未配置 LLM 时，意图解析依赖关键词匹配。配置 LLM 后自然语言任意表达均可识别。
 
 **症状关键词**：
 
@@ -200,11 +202,15 @@ llm:
 ```
 用户输入
   │
-  ├─ 意图解析（规则匹配 + LLM 回退）
-  ├─ 上下文补全（会话历史、活跃 findings）
-  ├─ 请求校验
+  ├─ "ns/name" 格式? → regex 快速路径，直接诊断（零 LLM 开销）
   │
-  ├─ 策略守卫检查（只读、命名空间白名单、调用上限）
+  ├─ LLM 可用? → LLM 意图解析（自然语言 → intent + scope + symptoms）
+  │   │              识别非 K8s 输入 → 友好提示
+  │   └─ LLM 失败 → regex 降级
+  │
+  ├─ 纯规则模式 → 关键词匹配（regex fallback）
+  │
+  ├─ 上下文补全 → 请求校验 → 策略守卫
   │
   ├─ 工具执行计划：
   │   get_pod → get_pod_events → get_container_logs (当前+上次)
